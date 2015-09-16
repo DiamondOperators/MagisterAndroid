@@ -3,4 +3,9 @@
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="agenda">Agenda</string>
+    <string name="cijfers">Cijfers</string>
+    <string name="instellingen">Instellingen</string>
+    <string name="close_drawer">Close drawer</string>
+    <string name="open_drawer">Open drawer</string>
 </resources>
