@@ -18,11 +18,16 @@
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
             app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
 
-        <FrameLayout
+        <!--<FrameLayout
             android:id="@+id/fragment_container"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_weight="1" />-->
+        <com.diamondoperators.android.magister.AgendaView
+            android:layout_margin="8dp"
+            android:id="@+id/agendaView"
+            android:layout_width="match_parent"
+            android:layout_height="50dp" />
     </LinearLayout>
 
     <android.support.design.widget.NavigationView
