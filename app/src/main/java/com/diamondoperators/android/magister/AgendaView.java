@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.View;
@@ -14,12 +15,13 @@ import java.util.List;
 
 public class AgendaView extends View {
 
-    private Paint mRoundRectPaint, mNowIndicatorPaint, mTextPaint;
+    private Paint mRoundRectPaint, mNowIndicatorPaint, mTitleTextPaint, mDescriptionTextPaint;
     private RectF mRoundRect;
     private float mPixelsPerHour = 200;
     private float mPaddingBetweenAppointments = 3;
     private float mAppointmentsPadding;
     private float mNowIndicatorWidth = 5;
+    private float mTextLineMargins = 5;
     private float mTextPaddingTop, mTextPaddingLeft;
     private int mNowIndicatorColor = Color.RED;
 
@@ -34,20 +36,28 @@ public class AgendaView extends View {
         mNowIndicatorColor = getResources().getColor(R.color.colorAccent);
         mNowIndicatorPaint.setColor(mNowIndicatorColor);
         mRoundRect = new RectF();
-        mTextPaint = new Paint();
+        mTitleTextPaint = new Paint();
+        mTitleTextPaint.setColor(Color.WHITE);
+        mDescriptionTextPaint = new Paint(mTitleTextPaint);
         setTitleTextSize(18);
-        mTextPaint.setColor(Color.WHITE);
+        mTitleTextPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+        setDescriptionTextSize(15);
+
+        mTitleTextPaint.setAntiAlias(true);
+        mDescriptionTextPaint.setAntiAlias(true);
+        mRoundRectPaint.setAntiAlias(true);
+        mNowIndicatorPaint.setAntiAlias(true);
 
         // 8 dp
         mAppointmentsPadding = mTextPaddingTop = mTextPaddingLeft =
                 8 * getResources().getDisplayMetrics().densityDpi / 160f;
 
-        data.add(new Appointment("Wiskunde B", 1443162600, 1443166800));
-        data.add(new Appointment("Grieks", 1443167700, 1443171900));
-        data.add(new Appointment("Flipperkast programmeren", 1443171900, 1443174300));
-        data.add(new Appointment("Informatica", 1443176100, 1443180300));
-        data.add(new Appointment("Nederlands", 1443180300, 1443184500));
-        data.add(new Appointment("Natuurkunde", 1443185400, 1443189600));
+        data.add(new Appointment(1443162600, 1443166800, "Biologie", "MAJ", "a031", "A5vBi1", "Bi - MAJ - A5vBi1"));
+        data.add(new Appointment(1443167700, 1443171900, "Grieks", "M.L. Kopinga", "a121", "A5vGrTL1", "GrTL - KOM - A5vGrTL1"));
+        data.add(new Appointment(1443171900, 1443174300, "Flipperkast programmeren", "S. van der Staaij", "a107", "VWO Xtra", "V_v5_vxtra - STA"));
+        data.add(new Appointment(1443176100, 1443180300, "Informatica", "S. van der Staaij", "a107", "A5vIn1", "In - STA - A5vIn1"));
+        data.add(new Appointment(1443180300, 1443184500, "Nederlands", "M. Louwman", "a102", "A5v5", "NeTL - LOU - A5v5"));
+        data.add(new Appointment(1443185400, 1443189600, "Natuurkunde", "J.H.D. Dozeman", "a023", "A5vNa3", "Na - DOH - A5vNa3"));
     }
 
     @Override
@@ -56,16 +66,21 @@ public class AgendaView extends View {
 
         long firstAppointment = timeOfFirstAppointment();
 
-        for (int i = 0; i < data.size(); i++) {
-            float start = (data.get(i).getStartTime() - firstAppointment) / 3600f * mPixelsPerHour
+        for (Appointment appointment : data) {
+            float start = (appointment.getStartTime() - firstAppointment) / 3600f * mPixelsPerHour
                     + mAppointmentsPadding;
-            float end = (data.get(i).getEndTime() - firstAppointment) / 3600f * mPixelsPerHour
+            float end = (appointment.getEndTime() - firstAppointment) / 3600f * mPixelsPerHour
                     + mAppointmentsPadding - mPaddingBetweenAppointments;
             mRoundRect.set(mAppointmentsPadding, start, getWidth() - mAppointmentsPadding, end);
             canvas.drawRoundRect(mRoundRect, 20, 20, mRoundRectPaint);
 
-            canvas.drawText(data.get(i).getName(), mAppointmentsPadding + mTextPaddingLeft,
-                    start + mTextPaint.getTextSize() + mTextPaddingTop, mTextPaint);
+            canvas.drawText(appointment.getSubject(), mAppointmentsPadding + mTextPaddingLeft,
+                    start + mTitleTextPaint.getTextSize() + mTextPaddingTop, mTitleTextPaint);
+            String subtitle = String.format("%s — %s", appointment.getLocation(), appointment.getTeacher());
+            canvas.drawText(subtitle, mAppointmentsPadding + mTextPaddingLeft,
+                    start + mDescriptionTextPaint.getTextSize() + mTextPaddingTop
+                            + mTitleTextPaint.getTextSize() + mTextLineMargins,
+                    mDescriptionTextPaint);
         }
 
         float nowIndicator = (/*System.currentTimeMillis() / 1000*/ 1443169780 - firstAppointment) / 3600f * mPixelsPerHour
@@ -103,7 +118,12 @@ public class AgendaView extends View {
     }
 
     public void setTitleTextSize(float sizeSP) {
-        mTextPaint.setTextSize(TypedValue.applyDimension(
+        mTitleTextPaint.setTextSize(TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_SP, sizeSP, getResources().getDisplayMetrics()));
+    }
+
+    public void setDescriptionTextSize(float sizeSP) {
+        mDescriptionTextPaint.setTextSize(TypedValue.applyDimension(
                 TypedValue.COMPLEX_UNIT_SP, sizeSP, getResources().getDisplayMetrics()));
     }
 }
