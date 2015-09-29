@@ -33,7 +33,7 @@ public class AgendaView extends View {
         mRoundRectPaint.setStyle(Paint.Style.FILL);
         mNowIndicatorPaint = new Paint();
         mNowIndicatorPaint.setStrokeWidth(mNowIndicatorWidth);
-        mNowIndicatorColor = getResources().getColor(R.color.colorAccent);
+        mNowIndicatorColor = getResources().getColor(R.color.colorPrimaryDark);
         mNowIndicatorPaint.setColor(mNowIndicatorColor);
         mRoundRect = new RectF();
         mTitleTextPaint = new Paint();
@@ -73,20 +73,24 @@ public class AgendaView extends View {
                     + mAppointmentsPadding - mPaddingBetweenAppointments;
             mRoundRect.set(mAppointmentsPadding, start, getWidth() - mAppointmentsPadding, end);
             canvas.drawRoundRect(mRoundRect, 20, 20, mRoundRectPaint);
-
-            canvas.drawText(appointment.getSubject(), mAppointmentsPadding + mTextPaddingLeft,
-                    start + mTitleTextPaint.getTextSize() + mTextPaddingTop, mTitleTextPaint);
-            String subtitle = String.format("%s — %s", appointment.getLocation(), appointment.getTeacher());
-            canvas.drawText(subtitle, mAppointmentsPadding + mTextPaddingLeft,
-                    start + mDescriptionTextPaint.getTextSize() + mTextPaddingTop
-                            + mTitleTextPaint.getTextSize() + mTextLineMargins,
-                    mDescriptionTextPaint);
         }
 
-        float nowIndicator = (/*System.currentTimeMillis() / 1000*/ 1443169780 - firstAppointment) / 3600f * mPixelsPerHour
+        float nowIndicator = (/*System.currentTimeMillis() / 1000*/ 1443169400 - firstAppointment) / 3600f * mPixelsPerHour
                 + mAppointmentsPadding;
         canvas.drawLine(mAppointmentsPadding, nowIndicator, getWidth(), nowIndicator, mNowIndicatorPaint);
         canvas.drawCircle(mAppointmentsPadding, nowIndicator, mNowIndicatorWidth * 3, mNowIndicatorPaint);
+
+        for (Appointment appointment : data) {
+            float start = (appointment.getStartTime() - firstAppointment) / 3600f * mPixelsPerHour
+                    + mAppointmentsPadding + mTextPaddingTop + mTitleTextPaint.getTextSize();
+
+            canvas.drawText(appointment.getSubject(), mAppointmentsPadding + mTextPaddingLeft,
+                    start, mTitleTextPaint);
+            String subtitle = String.format("%s — %s", appointment.getLocation(), appointment.getTeacher());
+            canvas.drawText(subtitle, mAppointmentsPadding + mTextPaddingLeft,
+                    start + mDescriptionTextPaint.getTextSize() + mTextLineMargins,
+                    mDescriptionTextPaint);
+        }
     }
 
     private long timeOfFirstAppointment() {
