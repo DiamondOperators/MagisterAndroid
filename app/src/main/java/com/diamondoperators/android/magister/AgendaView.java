@@ -17,40 +17,44 @@ public class AgendaView extends View {
 
     private Paint mRoundRectPaint, mNowIndicatorPaint, mTitleTextPaint, mDescriptionTextPaint;
     private RectF mRoundRect;
+    private float mNowIndicatorCircleRadius = 10;
     private float mPixelsPerHour = 200;
-    private float mPaddingBetweenAppointments = 3;
+    private float mAppointmentSpacing = 3;
     private float mAppointmentsPadding;
-    private float mNowIndicatorWidth = 5;
-    private float mTextLineMargins = 5;
+    private float mLineSpacing = 5;
     private float mTextPaddingTop, mTextPaddingLeft;
-    private int mNowIndicatorColor = Color.RED;
 
     private List<Appointment> data = new ArrayList<>();
 
     private void init() {
-        mRoundRectPaint = new Paint();
-        mRoundRectPaint.setColor(getResources().getColor(R.color.agendaAppointmentColor));
-        mRoundRectPaint.setStyle(Paint.Style.FILL);
-        mNowIndicatorPaint = new Paint();
-        mNowIndicatorPaint.setStrokeWidth(mNowIndicatorWidth);
-        mNowIndicatorColor = getResources().getColor(R.color.colorPrimaryDark);
-        mNowIndicatorPaint.setColor(mNowIndicatorColor);
         mRoundRect = new RectF();
+        mRoundRectPaint = new Paint();
+        mNowIndicatorPaint = new Paint();
         mTitleTextPaint = new Paint();
-        mTitleTextPaint.setColor(Color.WHITE);
-        mDescriptionTextPaint = new Paint(mTitleTextPaint);
-        setTitleTextSize(18);
+        mDescriptionTextPaint = new Paint();
+        mRoundRectPaint.setStyle(Paint.Style.FILL);
         mTitleTextPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD));
+
+        // Set default values
+        setAppointmentColor(getResources().getColor(R.color.agendaAppointmentColor));
+        setNowIndicatorColor(getResources().getColor(R.color.colorPrimaryDark));
+        setNowIndicatorHeight(1.5f);
+        setNowIndicatorCircleRadius(4.5f);
+        setTitleTextColor(Color.WHITE);
+        setDescriptionTextColor(Color.WHITE);
+        setTitleTextSize(18);
         setDescriptionTextSize(15);
+        setAppointmentsPadding(8);
+        setTextPaddingTop(8);
+        setTextPaddingLeft(8);
+        setLineSpacing(TypedValue.COMPLEX_UNIT_SP, 3);
+        setHourHeight(76);
+        setAppointmentSpacing(1.3f);
 
         mTitleTextPaint.setAntiAlias(true);
         mDescriptionTextPaint.setAntiAlias(true);
         mRoundRectPaint.setAntiAlias(true);
         mNowIndicatorPaint.setAntiAlias(true);
-
-        // 8 dp
-        mAppointmentsPadding = mTextPaddingTop = mTextPaddingLeft =
-                8 * getResources().getDisplayMetrics().densityDpi / 160f;
 
         data.add(new Appointment(1443162600, 1443166800, "Biologie", "MAJ", "a031", "A5vBi1", "Bi - MAJ - A5vBi1"));
         data.add(new Appointment(1443167700, 1443171900, "Grieks", "M.L. Kopinga", "a121", "A5vGrTL1", "GrTL - KOM - A5vGrTL1"));
@@ -70,7 +74,7 @@ public class AgendaView extends View {
             float start = (appointment.getStartTime() - firstAppointment) / 3600f * mPixelsPerHour
                     + mAppointmentsPadding;
             float end = (appointment.getEndTime() - firstAppointment) / 3600f * mPixelsPerHour
-                    + mAppointmentsPadding - mPaddingBetweenAppointments;
+                    + mAppointmentsPadding - mAppointmentSpacing;
             mRoundRect.set(mAppointmentsPadding, start, getWidth() - mAppointmentsPadding, end);
             canvas.drawRoundRect(mRoundRect, 20, 20, mRoundRectPaint);
         }
@@ -78,7 +82,7 @@ public class AgendaView extends View {
         float nowIndicator = (/*System.currentTimeMillis() / 1000*/ 1443169400 - firstAppointment) / 3600f * mPixelsPerHour
                 + mAppointmentsPadding;
         canvas.drawLine(mAppointmentsPadding, nowIndicator, getWidth(), nowIndicator, mNowIndicatorPaint);
-        canvas.drawCircle(mAppointmentsPadding, nowIndicator, mNowIndicatorWidth * 3, mNowIndicatorPaint);
+        canvas.drawCircle(mAppointmentsPadding, nowIndicator, mNowIndicatorCircleRadius, mNowIndicatorPaint);
 
         for (Appointment appointment : data) {
             float start = (appointment.getStartTime() - firstAppointment) / 3600f * mPixelsPerHour
@@ -88,7 +92,7 @@ public class AgendaView extends View {
                     start, mTitleTextPaint);
             String subtitle = String.format("%s — %s", appointment.getLocation(), appointment.getTeacher());
             canvas.drawText(subtitle, mAppointmentsPadding + mTextPaddingLeft,
-                    start + mDescriptionTextPaint.getTextSize() + mTextLineMargins,
+                    start + mDescriptionTextPaint.getTextSize() + mLineSpacing,
                     mDescriptionTextPaint);
         }
     }
@@ -121,13 +125,147 @@ public class AgendaView extends View {
         init();
     }
 
-    public void setTitleTextSize(float sizeSP) {
-        mTitleTextPaint.setTextSize(TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_SP, sizeSP, getResources().getDisplayMetrics()));
+
+    public void setTitleTextSize(float size) {
+        setTitleTextSize(TypedValue.COMPLEX_UNIT_SP, size);
     }
 
-    public void setDescriptionTextSize(float sizeSP) {
-        mDescriptionTextPaint.setTextSize(TypedValue.applyDimension(
-                TypedValue.COMPLEX_UNIT_SP, sizeSP, getResources().getDisplayMetrics()));
+    public void setTitleTextSize(int unit, float size) {
+        mTitleTextPaint.setTextSize(toPx(unit, size));
+        invalidate();
+        requestLayout();
+    }
+
+    public void setTitleTextColor(int color) {
+        mTitleTextPaint.setColor(color);
+        invalidate();
+        requestLayout();
+    }
+
+    public void setDescriptionTextColor(int color) {
+        mDescriptionTextPaint.setColor(color);
+        invalidate();
+        requestLayout();
+    }
+
+    public void setDescriptionTextSize(float size) {
+        setDescriptionTextSize(TypedValue.COMPLEX_UNIT_SP, size);
+    }
+
+    public void setDescriptionTextSize(int unit, float size) {
+        mDescriptionTextPaint.setTextSize(toPx(unit, size));
+        invalidate();
+        requestLayout();
+    }
+
+    /**
+     * Set the color for the circle and line which represent the
+     * current time.
+     *
+     * @param color The color.
+     */
+    public void setNowIndicatorColor(int color) {
+        mNowIndicatorPaint.setColor(color);
+        invalidate();
+    }
+
+    /**
+     * Set the color for the round rectangles which
+     * represent the individual appointments.
+     *
+     * @param color The color.
+     */
+    public void setAppointmentColor(int color) {
+        mRoundRectPaint.setColor(color);
+        invalidate();
+    }
+
+    /**
+     * @param height The height for the now indicator in
+     *               density independent pixels (DIP)
+     */
+    public void setNowIndicatorHeight(float height) {
+        setNowIndicatorHeight(TypedValue.COMPLEX_UNIT_DIP, height);
+    }
+
+    /**
+     * @param unit   The unit for the height: TypedValue.COMPLEX_UNIT_
+     * @param height The height given in the specified unit.
+     */
+    public void setNowIndicatorHeight(int unit, float height) {
+        mNowIndicatorPaint.setStrokeWidth(toPx(unit, height));
+        invalidate();
+        requestLayout();
+    }
+
+    public void setAppointmentsPadding(float size) {
+        setAppointmentsPadding(TypedValue.COMPLEX_UNIT_DIP, size);
+    }
+
+    public void setAppointmentsPadding(int unit, float size) {
+        mAppointmentsPadding = toPx(unit, size);
+        invalidate();
+        requestLayout();
+    }
+
+    public void setTextPaddingTop(float padding) {
+        setTextPaddingTop(TypedValue.COMPLEX_UNIT_DIP, padding);
+    }
+
+    public void setTextPaddingTop(int unit, float padding) {
+        mTextPaddingTop = toPx(unit, padding);
+        invalidate();
+        requestLayout();
+    }
+
+    public void setTextPaddingLeft(float padding) {
+        setTextPaddingLeft(TypedValue.COMPLEX_UNIT_DIP, padding);
+    }
+
+    public void setTextPaddingLeft(int unit, float padding) {
+        mTextPaddingLeft = toPx(unit, padding);
+        invalidate();
+        requestLayout();
+    }
+
+    public void setNowIndicatorCircleRadius(float radius) {
+        setNowIndicatorCircleRadius(TypedValue.COMPLEX_UNIT_DIP, radius);
+    }
+
+    public void setNowIndicatorCircleRadius(int unit, float radius) {
+        mNowIndicatorCircleRadius = toPx(unit, radius);
+        invalidate();
+        requestLayout();
+    }
+
+    public void setLineSpacing(int unit, float size) {
+        mLineSpacing = toPx(unit, size);
+        invalidate();
+        requestLayout();
+    }
+
+    public void setHourHeight(float size) {
+        setHourHeight(TypedValue.COMPLEX_UNIT_DIP, size);
+    }
+
+    public void setHourHeight(int unit, float size) {
+        mPixelsPerHour = toPx(unit, size);
+        invalidate();
+        requestLayout();
+    }
+
+    public void setAppointmentSpacing(float size) {
+        setAppointmentSpacing(TypedValue.COMPLEX_UNIT_DIP, size);
+    }
+
+    public void setAppointmentSpacing(int unit, float size) {
+        mAppointmentSpacing = toPx(unit, size);
+        invalidate();
+        requestLayout();
+    }
+
+    private float toPx(int unit, float size) {
+        return TypedValue.applyDimension(
+                unit, size, getResources().getDisplayMetrics());
     }
 }
