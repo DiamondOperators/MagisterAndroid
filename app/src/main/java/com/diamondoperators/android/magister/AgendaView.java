@@ -17,11 +17,11 @@ public class AgendaView extends View {
 
     private Paint mRoundRectPaint, mNowIndicatorPaint, mTitleTextPaint, mDescriptionTextPaint;
     private RectF mRoundRect;
-    private float mNowIndicatorCircleRadius = 10;
-    private float mPixelsPerHour = 200;
-    private float mAppointmentSpacing = 3;
+    private float mNowIndicatorCircleRadius;
+    private float mPixelsPerHour;
+    private float mAppointmentSpacing;
     private float mAppointmentsPadding;
-    private float mLineSpacing = 5;
+    private float mLineSpacing;
     private float mTextPaddingTop, mTextPaddingLeft;
 
     private List<Appointment> data = new ArrayList<>();
@@ -48,7 +48,7 @@ public class AgendaView extends View {
         setTextPaddingTop(8);
         setTextPaddingLeft(8);
         setLineSpacing(TypedValue.COMPLEX_UNIT_SP, 3);
-        setHourHeight(76);
+        setHourHeight(100);
         setAppointmentSpacing(1.3f);
 
         mTitleTextPaint.setAntiAlias(true);
@@ -65,10 +65,29 @@ public class AgendaView extends View {
     }
 
     @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int hSpecMode = MeasureSpec.getMode(heightMeasureSpec);
+        int hSpecSize = MeasureSpec.getSize(heightMeasureSpec);
+        int wSpecSize = MeasureSpec.getSize(widthMeasureSpec);
+
+        if (hSpecMode == MeasureSpec.AT_MOST || hSpecMode == MeasureSpec.UNSPECIFIED) {
+            hSpecSize = getWrapContentHeight();
+        }
+
+        setMeasuredDimension(wSpecSize, hSpecSize);
+    }
+
+    private int getWrapContentHeight() {
+        long firstAppointment = startTimeOfFirstAppointment();
+        long lastAppointment = endTimeOfLastAppointment();
+        return (int) ((lastAppointment - firstAppointment) / 3600f * mPixelsPerHour + 2 * mAppointmentsPadding);
+    }
+
+    @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        long firstAppointment = timeOfFirstAppointment();
+        long firstAppointment = startTimeOfFirstAppointment();
 
         for (Appointment appointment : data) {
             float start = (appointment.getStartTime() - firstAppointment) / 3600f * mPixelsPerHour
@@ -97,13 +116,26 @@ public class AgendaView extends View {
         }
     }
 
-    private long timeOfFirstAppointment() {
+    private long startTimeOfFirstAppointment() {
         try {
             long earliest = data.get(0).getStartTime();
             for (int i = 1; i < data.size(); i++)
                 if (data.get(i).getStartTime() < earliest)
                     earliest = data.get(i).getStartTime();
             return earliest;
+        } catch (NullPointerException | ArrayIndexOutOfBoundsException e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+    private long endTimeOfLastAppointment() {
+        try {
+            long last = data.get(0).getEndTime();
+            for (int i = 1; i < data.size(); i++)
+                if (data.get(i).getEndTime() > last)
+                    last = data.get(i).getEndTime();
+            return last;
         } catch (NullPointerException | ArrayIndexOutOfBoundsException e) {
             e.printStackTrace();
             return 0;

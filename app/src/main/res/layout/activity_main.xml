@@ -18,15 +18,17 @@
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
             app:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
 
-        <!--<FrameLayout
-            android:id="@+id/fragment_container"
+        <ScrollView
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1" />-->
-        <com.diamondoperators.android.magister.AgendaView
-            android:id="@+id/agendaView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_weight="1">
+
+            <com.diamondoperators.android.magister.AgendaView
+                android:id="@+id/agendaView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </ScrollView>
+
     </LinearLayout>
 
     <android.support.design.widget.NavigationView
