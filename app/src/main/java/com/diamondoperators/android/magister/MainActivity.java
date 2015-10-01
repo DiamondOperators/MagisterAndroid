@@ -2,13 +2,15 @@ package com.diamondoperators.android.magister;
 
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
+        AgendaView.OnAppointmentClickListener {
 
     NavigationView navigationView;
     DrawerLayout drawerLayout;
@@ -29,6 +31,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setupDrawerToggle();
         navigationView.setCheckedItem(R.id.agenda);
         navigationView.setNavigationItemSelectedListener(this);
+
+        AgendaView agendaView = (AgendaView) findViewById(R.id.agendaView);
+        agendaView.setOnAppointmentClickListener(this);
+    }
+
+    @Override
+    public void onClickAppointment(Appointment appt) {
+        Snackbar.make(drawerLayout, "Clicked on appointment " + appt.getSubject(), Snackbar.LENGTH_LONG).show();
     }
 
     private void setupDrawerToggle() {

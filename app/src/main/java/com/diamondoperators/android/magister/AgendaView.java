@@ -8,13 +8,14 @@ import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.util.AttributeSet;
 import android.util.TypedValue;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class AgendaView extends View {
-
     private Paint mRoundRectPaint, mNowIndicatorPaint, mTitleTextPaint, mDescriptionTextPaint;
     private RectF mRoundRect;
     private float mNowIndicatorCircleRadius;
@@ -24,7 +25,12 @@ public class AgendaView extends View {
     private float mLineSpacing;
     private float mTextPaddingTop, mTextPaddingLeft;
 
-    private List<Appointment> data = new ArrayList<>();
+    private List<Appointment> mData = new ArrayList<>();
+    private float[] mStartYs = new float[0];
+    private float[] mEndYs = new float[0];
+
+    private OnAppointmentClickListener mClickListener;
+    private GestureDetector mDetector;
 
     private void init() {
         mRoundRect = new RectF();
@@ -56,12 +62,14 @@ public class AgendaView extends View {
         mRoundRectPaint.setAntiAlias(true);
         mNowIndicatorPaint.setAntiAlias(true);
 
-        data.add(new Appointment(1443162600, 1443166800, "Biologie", "MAJ", "a031", "A5vBi1", "Bi - MAJ - A5vBi1"));
-        data.add(new Appointment(1443167700, 1443171900, "Grieks", "M.L. Kopinga", "a121", "A5vGrTL1", "GrTL - KOM - A5vGrTL1"));
-        data.add(new Appointment(1443171900, 1443174300, "Flipperkast programmeren", "S. van der Staaij", "a107", "VWO Xtra", "V_v5_vxtra - STA"));
-        data.add(new Appointment(1443176100, 1443180300, "Informatica", "S. van der Staaij", "a107", "A5vIn1", "In - STA - A5vIn1"));
-        data.add(new Appointment(1443180300, 1443184500, "Nederlands", "M. Louwman", "a102", "A5v5", "NeTL - LOU - A5v5"));
-        data.add(new Appointment(1443185400, 1443189600, "Natuurkunde", "J.H.D. Dozeman", "a023", "A5vNa3", "Na - DOH - A5vNa3"));
+        mData.add(new Appointment(1443162600, 1443166800, "Biologie", "MAJ", "a031", "A5vBi1", "Bi - MAJ - A5vBi1"));
+        mData.add(new Appointment(1443167700, 1443171900, "Grieks", "M.L. Kopinga", "a121", "A5vGrTL1", "GrTL - KOM - A5vGrTL1"));
+        mData.add(new Appointment(1443171900, 1443174300, "Flipperkast programmeren", "S. van der Staaij", "a107", "VWO Xtra", "V_v5_vxtra - STA"));
+        mData.add(new Appointment(1443176100, 1443180300, "Informatica", "S. van der Staaij", "a107", "A5vIn1", "In - STA - A5vIn1"));
+        mData.add(new Appointment(1443180300, 1443184500, "Nederlands", "M. Louwman", "a102", "A5v5", "NeTL - LOU - A5v5"));
+        mData.add(new Appointment(1443185400, 1443189600, "Natuurkunde", "J.H.D. Dozeman", "a023", "A5vNa3", "Na - DOH - A5vNa3"));
+
+        mDetector = new GestureDetector(getContext(), new AgendaGestureListener());
     }
 
     @Override
@@ -86,42 +94,52 @@ public class AgendaView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        mStartYs = new float[mData.size()];
+        mEndYs = new float[mData.size()];
 
         long firstAppointment = startTimeOfFirstAppointment();
 
-        for (Appointment appointment : data) {
-            float start = (appointment.getStartTime() - firstAppointment) / 3600f * mPixelsPerHour
+        // Draw rounded triangles
+        for (int i = 0; i < mData.size(); i++) {
+            mStartYs[i] = (mData.get(i).getStartTime() - firstAppointment) / 3600f * mPixelsPerHour
                     + mAppointmentsPadding;
-            float end = (appointment.getEndTime() - firstAppointment) / 3600f * mPixelsPerHour
+            mEndYs[i] = (mData.get(i).getEndTime() - firstAppointment) / 3600f * mPixelsPerHour
                     + mAppointmentsPadding - mAppointmentSpacing;
-            mRoundRect.set(mAppointmentsPadding, start, getWidth() - mAppointmentsPadding, end);
+            mRoundRect.set(mAppointmentsPadding, mStartYs[i], getWidth() - mAppointmentsPadding, mEndYs[i]);
             canvas.drawRoundRect(mRoundRect, 20, 20, mRoundRectPaint);
         }
 
+        // Draw now indicator
         float nowIndicator = (/*System.currentTimeMillis() / 1000*/ 1443169400 - firstAppointment) / 3600f * mPixelsPerHour
                 + mAppointmentsPadding;
         canvas.drawLine(mAppointmentsPadding, nowIndicator, getWidth(), nowIndicator, mNowIndicatorPaint);
         canvas.drawCircle(mAppointmentsPadding, nowIndicator, mNowIndicatorCircleRadius, mNowIndicatorPaint);
 
-        for (Appointment appointment : data) {
-            float start = (appointment.getStartTime() - firstAppointment) / 3600f * mPixelsPerHour
-                    + mAppointmentsPadding + mTextPaddingTop + mTitleTextPaint.getTextSize();
+        // Draw text
+        for (int i = 0; i < mData.size(); i++) {
+            Appointment appt = mData.get(i);
+            float start = mStartYs[i] + mTextPaddingTop + mTitleTextPaint.getTextSize();
 
-            canvas.drawText(appointment.getSubject(), mAppointmentsPadding + mTextPaddingLeft,
+            canvas.drawText(appt.getSubject(), mAppointmentsPadding + mTextPaddingLeft,
                     start, mTitleTextPaint);
-            String subtitle = String.format("%s — %s", appointment.getLocation(), appointment.getTeacher());
+            String subtitle = String.format("%s — %s", appt.getLocation(), appt.getTeacher());
             canvas.drawText(subtitle, mAppointmentsPadding + mTextPaddingLeft,
                     start + mDescriptionTextPaint.getTextSize() + mLineSpacing,
                     mDescriptionTextPaint);
         }
     }
 
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        return mDetector.onTouchEvent(event);
+    }
+
     private long startTimeOfFirstAppointment() {
         try {
-            long earliest = data.get(0).getStartTime();
-            for (int i = 1; i < data.size(); i++)
-                if (data.get(i).getStartTime() < earliest)
-                    earliest = data.get(i).getStartTime();
+            long earliest = mData.get(0).getStartTime();
+            for (int i = 1; i < mData.size(); i++)
+                if (mData.get(i).getStartTime() < earliest)
+                    earliest = mData.get(i).getStartTime();
             return earliest;
         } catch (NullPointerException | ArrayIndexOutOfBoundsException e) {
             e.printStackTrace();
@@ -131,10 +149,10 @@ public class AgendaView extends View {
 
     private long endTimeOfLastAppointment() {
         try {
-            long last = data.get(0).getEndTime();
-            for (int i = 1; i < data.size(); i++)
-                if (data.get(i).getEndTime() > last)
-                    last = data.get(i).getEndTime();
+            long last = mData.get(0).getEndTime();
+            for (int i = 1; i < mData.size(); i++)
+                if (mData.get(i).getEndTime() > last)
+                    last = mData.get(i).getEndTime();
             return last;
         } catch (NullPointerException | ArrayIndexOutOfBoundsException e) {
             e.printStackTrace();
@@ -299,5 +317,36 @@ public class AgendaView extends View {
     private float toPx(int unit, float size) {
         return TypedValue.applyDimension(
                 unit, size, getResources().getDisplayMetrics());
+    }
+
+    public void setOnAppointmentClickListener(OnAppointmentClickListener listener) {
+        mClickListener = listener;
+    }
+
+
+    public interface OnAppointmentClickListener {
+        void onClickAppointment(Appointment appt);
+    }
+
+    class AgendaGestureListener extends GestureDetector.SimpleOnGestureListener {
+        @Override
+        public boolean onDown(MotionEvent e) {
+            return true;
+        }
+
+        @Override
+        public boolean onSingleTapUp(MotionEvent event) {
+            float y = event.getY();
+            for (int i = 0; i < mStartYs.length; i++) {
+                if (y >= mStartYs[i] && y <= mEndYs[i]) {
+                    if (mClickListener != null) {
+                        mClickListener.onClickAppointment(mData.get(i));
+                    }
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 }
