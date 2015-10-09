@@ -4,4 +4,10 @@
 /build
 /captures
 .idea/
-*.iml
+/build.gradle
+/gradle.properties
+/gradlew
+/gradlew.bat
+/MagisterAndroid.iml
+/settings.gradle
+/gradle/
