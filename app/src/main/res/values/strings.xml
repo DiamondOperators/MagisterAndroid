@@ -8,4 +8,12 @@
     <string name="instellingen">Instellingen</string>
     <string name="close_drawer">Close drawer</string>
     <string name="open_drawer">Open drawer</string>
+    <string name="leraar">"Leraar: "</string>
+    <string name="locatie">"\nLocatie: "</string>
+    <string name="groep">"\nGroep: "</string>
+    <string name="starttijd">"\nStarttijd: "</string>
+    <string name="eindtijd">"\nEindtijd: "</string>
+    <string name="beschrijving">"\nBeschrijving: "</string>
+    <string name="ok">OK</string>
+    <string name="onbekend_vak">Onbekend vak</string>
 </resources>

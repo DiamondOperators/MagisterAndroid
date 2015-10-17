@@ -1,9 +1,10 @@
 package com.diamondoperators.android.magister;
 
-import android.app.AlertDialog;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,14 +14,12 @@ import java.util.Date;
 
 public class AgendaFragment extends Fragment implements AgendaView.OnAppointmentClickListener {
 
-    AgendaView agendaView;
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View theView = inflater.inflate(R.layout.fragment_agenda, container, false);
 
-        agendaView = (AgendaView) theView.findViewById(R.id.agendaView);
+        AgendaView agendaView = (AgendaView) theView.findViewById(R.id.agendaView);
         agendaView.setOnAppointmentClickListener(this);
 
         return theView;
@@ -32,15 +31,23 @@ public class AgendaFragment extends Fragment implements AgendaView.OnAppointment
         String startTime = format.format(new Date(appt.getStartTime() * 1000));
         String endTime = format.format(new Date(appt.getEndTime() * 1000));
 
-        String title = appt.getSubject() != null ? appt.getSubject() : "Onbekend vak";
+        Context c = getContext();
+
+        String title = appt.getSubject() != null ? appt.getSubject() : c.getString(R.string.onbekend_vak);
+
         StringBuilder msg = new StringBuilder();
-        if (appt.getTeacher() != null) msg.append("Leraar: ").append(appt.getTeacher());
-        if (appt.getLocation() != null) msg.append("\nLocatie: ").append(appt.getLocation());
-        if (appt.getGroup() != null) msg.append("\nGroep: ").append(appt.getGroup());
-        if (appt.getStartTime() != 0) msg.append("\nStarttijd: ").append(startTime);
-        if (appt.getEndTime() != 0) msg.append("\nEindtijd: ").append(endTime);
+        if (appt.getTeacher() != null)
+            msg.append(c.getString(R.string.leraar)).append(appt.getTeacher());
+        if (appt.getLocation() != null)
+            msg.append(c.getString(R.string.locatie)).append(appt.getLocation());
+        if (appt.getGroup() != null)
+            msg.append(c.getString(R.string.groep)).append(appt.getGroup());
+        if (appt.getStartTime() != 0)
+            msg.append(c.getString(R.string.starttijd)).append(startTime);
+        if (appt.getEndTime() != 0)
+            msg.append(c.getString(R.string.eindtijd)).append(endTime);
         if (appt.getDescription() != null)
-            msg.append("\nBeschrijving: ").append(appt.getDescription());
+            msg.append(c.getString(R.string.beschrijving)).append(appt.getDescription());
 
         new AlertDialog.Builder(getContext())
                 .setTitle(title).setMessage(msg)
