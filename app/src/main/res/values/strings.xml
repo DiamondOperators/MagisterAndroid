@@ -16,4 +16,5 @@
     <string name="beschrijving">"\nBeschrijving: "</string>
     <string name="ok">OK</string>
     <string name="onbekend_vak">Onbekend vak</string>
+    <string name="secure_grades_setting">Beveilig je cijfers</string>
 </resources>

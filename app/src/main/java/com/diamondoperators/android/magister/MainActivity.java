@@ -1,10 +1,10 @@
 package com.diamondoperators.android.magister;
 
+import android.app.Fragment;
 import android.app.KeyguardManager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
-import android.support.v4.app.Fragment;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navigationView.setCheckedItem(R.id.agenda);
         navigationView.setNavigationItemSelectedListener(this);
 
-        getSupportFragmentManager().beginTransaction()
+        getFragmentManager().beginTransaction()
                 .add(R.id.fragmentContainer, new AgendaFragment())
                 .commit();
     }
@@ -56,29 +56,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         Fragment newFragment = null;
         switch (menuItem.getItemId()) {
             case R.id.agenda:
-                if (getSupportFragmentManager().findFragmentById(R.id.fragmentContainer) instanceof AgendaFragment)
+                if (getFragmentManager().findFragmentById(R.id.fragmentContainer) instanceof AgendaFragment)
                     break;
                 newFragment = new AgendaFragment();
                 break;
             case R.id.cijfers:
-                if (getSupportFragmentManager().findFragmentById(R.id.cijfers) instanceof GradesFragment)
+                if (getFragmentManager().findFragmentById(R.id.cijfers) instanceof GradesFragment)
                     break;
                 showGradesFragment();
                 break;
             case R.id.instellingen:
-                if (getSupportFragmentManager().findFragmentById(R.id.cijfers) instanceof SettingsFragment)
+                if (getFragmentManager().findFragmentById(R.id.cijfers) instanceof SettingsFragment)
                     break;
                 newFragment = new SettingsFragment();
                 break;
         }
 
         if (newFragment != null) {
-            getSupportFragmentManager().beginTransaction()
+            getFragmentManager().beginTransaction()
                     .replace(R.id.fragmentContainer, newFragment).commit();
         }
 
         drawerLayout.closeDrawer(navigationView);
-        return false;
+        return true;
     }
 
     private void showGradesFragment() {
@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == CONFIRM_CREDENTIALS_REQUEST_CODE && resultCode == RESULT_OK) {
-            getSupportFragmentManager().beginTransaction()
+            getFragmentManager().beginTransaction()
                     .replace(R.id.fragmentContainer, new GradesFragment())
                     .commit();
         }
