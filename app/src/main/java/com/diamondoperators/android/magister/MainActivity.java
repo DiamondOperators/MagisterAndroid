@@ -4,6 +4,7 @@ import android.app.Fragment;
 import android.app.KeyguardManager;
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -13,6 +14,7 @@ import android.view.MenuItem;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private static final int CONFIRM_CREDENTIALS_REQUEST_CODE = 1;
+    private static final String SECURE_GRADES_PREFERENCE = "secure_grades";
 
     private NavigationView navigationView;
     private DrawerLayout drawerLayout;
@@ -63,7 +65,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case R.id.cijfers:
                 if (getFragmentManager().findFragmentById(R.id.cijfers) instanceof GradesFragment)
                     break;
-                showGradesFragment();
+                if (PreferenceManager.getDefaultSharedPreferences(this).getBoolean(SECURE_GRADES_PREFERENCE, false)) {
+                    confirmUserCredentialsForGrades();
+                } else {
+                    newFragment = new GradesFragment();
+                }
                 break;
             case R.id.instellingen:
                 if (getFragmentManager().findFragmentById(R.id.cijfers) instanceof SettingsFragment)
@@ -81,7 +87,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
-    private void showGradesFragment() {
+    private void confirmUserCredentialsForGrades() {
         KeyguardManager kManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
         Intent secureIntent = kManager.createConfirmDeviceCredentialIntent(null, null);
         if (secureIntent != null) {
