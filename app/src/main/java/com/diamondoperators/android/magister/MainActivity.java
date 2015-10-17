@@ -1,5 +1,7 @@
 package com.diamondoperators.android.magister;
 
+import android.app.KeyguardManager;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
@@ -10,11 +12,12 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+    private static final int CONFIRM_CREDENTIALS_REQUEST_CODE = 1;
 
-    NavigationView navigationView;
-    DrawerLayout drawerLayout;
-    ActionBarDrawerToggle drawerToggle;
-    Toolbar toolbar;
+    private NavigationView navigationView;
+    private DrawerLayout drawerLayout;
+    private ActionBarDrawerToggle drawerToggle;
+    private Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +63,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case R.id.cijfers:
                 if (getSupportFragmentManager().findFragmentById(R.id.cijfers) instanceof GradesFragment)
                     break;
-                newFragment = new GradesFragment();
+                showGradesFragment();
                 break;
             case R.id.instellingen:
                 if (getSupportFragmentManager().findFragmentById(R.id.cijfers) instanceof SettingsFragment)
@@ -76,5 +79,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         drawerLayout.closeDrawer(navigationView);
         return false;
+    }
+
+    private void showGradesFragment() {
+        KeyguardManager kManager = (KeyguardManager) getSystemService(KEYGUARD_SERVICE);
+        Intent secureIntent = kManager.createConfirmDeviceCredentialIntent(null, null);
+        if (secureIntent != null) {
+            startActivityForResult(secureIntent, CONFIRM_CREDENTIALS_REQUEST_CODE);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == CONFIRM_CREDENTIALS_REQUEST_CODE && resultCode == RESULT_OK) {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragmentContainer, new GradesFragment())
+                    .commit();
+        }
     }
 }
