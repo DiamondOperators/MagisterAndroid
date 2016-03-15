@@ -1,5 +1,13 @@
 apply plugin: 'java'
 
+repositories {
+    maven {
+        name = "ilexiconn"
+        url = "http://maven.ilexiconn.net/"
+    }
+}
+
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile "net.ilexiconn:magister:0.1.0"
 }
