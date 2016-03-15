@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         navigationView.setNavigationItemSelectedListener(this);
 
         getFragmentManager().beginTransaction()
-                .add(R.id.fragmentContainer, new AgendaFragment())
+                .replace(R.id.fragmentContainer, new AgendaFragment())
                 .commit();
     }
 
