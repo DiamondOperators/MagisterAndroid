@@ -1,4 +1,4 @@
 /build
 /proguard-rules.pro
 /src/androidTest
-/app.iml
+*.iml
