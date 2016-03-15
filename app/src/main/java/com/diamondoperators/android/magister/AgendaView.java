@@ -54,7 +54,7 @@ public class AgendaView extends View {
         setTextPaddingTop(8);
         setTextPaddingLeft(8);
         setLineSpacing(TypedValue.COMPLEX_UNIT_SP, 3);
-        setHourHeight(100);
+        setHourHeight(80);
         setAppointmentSpacing(1.3f);
 
         mTitleTextPaint.setAntiAlias(true);
